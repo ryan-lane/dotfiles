@@ -1,10 +1,8 @@
-" Map buffer management to something easier
-" Up/Down handle file open history
-nnoremap <leader><Up> <c-o>
-nnoremap <leader><Down> <c-i>
-" Left/Right handle previous and next in the buffer
-nnoremap <leader><Left> :bprevious<CR>
-nnoremap <leader><Right> :bnext<CR>
+" Up/Down handle previous and next in the buffer
+nnoremap <leader><Up> :bprevious<CR>
+nnoremap <leader><Down> :bnext<CR>
+" Left/Right handle previous and next windows
+nnoremap <leader><Left> <c-w><Left>
+nnoremap <leader><Right> <c-w><Right>
 " Delete deletes a buffer
-nnoremap <leader><Backspace> :bdelete<CR>
-nnoremap <leader><Backspace><Backspace> :bdelete!<CR>
+nnoremap <leader><Backspace> :bprevious<CR>:bdelete #<CR>
