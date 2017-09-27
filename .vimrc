@@ -68,6 +68,26 @@ function! UnMinify()
   normal ggVG=
 endfunction
 
+function! ConfirmQuit(writeFile)
+    if (a:writeFile)
+        if (expand('%:t')=="")
+            echo "Can't save a file with no name."
+            return
+        endif
+        :write
+    endif
+
+    " confirm quit if there's more than one buffer open
+    if (len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1)
+        if (confirm("Do you really want to quit?", "&Yes\n&No", 2)==1)
+            :quit
+        endif
+    else
+        :quit
+    endif
+endfunction
+cnoremap <silent> q<CR>  :call ConfirmQuit(0)<CR>
+
 " Setup vundle
 filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
