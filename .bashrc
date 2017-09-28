@@ -31,19 +31,36 @@ function clean_git_prompt {
 
 export PS1='\n\e[1m\u\e[m@\e[4m\h\e[m:\e[7m\w\e[m\[\033[01;31m\]$(dirty_git_prompt)\[\033[01;32m\]$(clean_git_prompt)\[\033[00m\]\n\# \$> '
 
-# Set the screen title to the current directory
+function title {
+  export EXPLICIT_TITLE=\*$*\*
+}
+
+function notitle() {
+  unset EXPLICIT_TITLE
+}
+
 if [ "$TERM" = "screen" ]; then
   export PROMPT_COMMAND='true'
-  set_screen_window() {
-    HPWD=`basename "$PWD"`
-    if [ "$HPWD" = "$USER" ]; then
-      HPWD='~';
-    fi
-    if [ ${#HPWD} -ge 20 ]; then
-      HPWD=${HPWD:0:18}'..';
-    fi
-    printf '\ek%s\e\\' "$HPWD"
-  }
+    set_screen_window() {
+      # If we've explicitly set a title, use that until it's unset.
+      if [ "$EXPLICIT_TITLE" ]; then
+        printf '\ek%s\e\\' "$EXPLICIT_TITLE"
+      # If we're entering a container, set the title to the container name
+      elif [[ $BASH_COMMAND =~ control\ enter.* ]]; then
+        CONTAINER=devbox:`echo $BASH_COMMAND | sed 's/control enter //'`
+        printf '\ek%s\e\\' "$CONTAINER"
+      # Otherwise, set the title based on the current directory
+      else
+        HPWD=`basename "$PWD"`
+        if [ "$HPWD" = "$USER" ]; then
+          HPWD='~';
+        fi
+        if [ ${#HPWD} -ge 20 ]; then
+          HPWD=${HPWD:0:18}'..';
+        fi
+        printf '\ek%s\e\\' "$HPWD"
+      fi
+    }
   # Dirty hack to make a command run before commands
   trap set_screen_window DEBUG
 fi
