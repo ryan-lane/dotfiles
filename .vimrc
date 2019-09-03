@@ -95,6 +95,41 @@ function! ConfirmQuit(writeFile)
 endfunction
 cnoremap <silent> q<CR> :call ConfirmQuit(0)<CR>
 
+" Toggle loc or quickfix list
+function! GetBufferList()
+  redir =>buflist
+  silent! ls!
+  redir END
+  return buflist
+endfunction
+
+function! ToggleList(bufname, pfx)
+  let buflist = GetBufferList()
+  for bufnum in map(filter(split(buflist, '\n'), 'v:val =~ "'.a:bufname.'"'), 'str2nr(matchstr(v:val, "\\d\\+"))')
+    if bufwinnr(bufnum) != -1
+      exec(a:pfx.'close')
+      return
+    endif
+  endfor
+  if a:pfx == 'l' && len(getloclist(0)) == 0
+      echohl ErrorMsg
+      echo "Location List is Empty."
+      return
+  endif
+  let winnr = winnr()
+  exec(a:pfx.'open')
+  if winnr() != winnr
+    wincmd p
+  endif
+endfunction
+nmap <silent> <leader>l :call ToggleList("Location List", 'l')<CR>
+
+" Auto-close the loclist buffer when exiting vim
+augroup CloseLoclistWindowGroup
+  autocmd!
+  autocmd QuitPre * if empty(&buftype) | lclose | endif
+augroup END
+
 " Use pyenv for neovim
 let g:python_host_prog = '/Users/ryanlane/.pyenv/versions/neovim/bin/python'
 let g:python3_host_prog = '/Users/ryanlane/.pyenv/versions/neovim3/bin/python'
@@ -166,15 +201,6 @@ let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 " Add maps for moving between errors
 nmap <silent> <C-k> <Plug>(ale_previous_wrap)
 nmap <silent> <C-j> <Plug>(ale_next_wrap)
-" Limit the loclist size and open it when errors appear
-let g:ale_list_window_size = 2
-let g:ale_open_list = 1
-let g:ale_set_loclist = 1
-" Auto-close the loclist buffer when exiting vim
-augroup CloseLoclistWindowGroup
-  autocmd!
-  autocmd QuitPre * if empty(&buftype) | lclose | endif
-augroup END
 
 " Python
 let g:ale_linters['python'] = ['flake8', 'mypy']
