@@ -1,3 +1,6 @@
+" Eliminate latency for ESC key
+set timeoutlen=1000 ttimeoutlen=10
+
 " Never compatible mode...
 set nocompatible
 
@@ -57,6 +60,9 @@ augroup resCur
   autocmd BufWinEnter * call ResCur()
 augroup END
 
+" Add a command alias JF to format a json file as pretty printed
+com! JF %!python -m json.tool
+
 " Simple re-format for minified Javascript
 " command! UnMinify call UnMinify()
 function! UnMinify()
@@ -78,15 +84,20 @@ function! ConfirmQuit(writeFile)
     endif
 
     " confirm quit if there's more than one buffer open
-    if (len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1)
-        if (confirm("Do you really want to quit?", "&Yes\n&No", 2)==1)
-            :quit
-        endif
-    else
-        :quit
-    endif
+    "if (len(filter(range(1, bufnr('$')), 'buflisted(v:val)')) > 1)
+    "    if (confirm("Do you really want to quit?", "&Yes\n&No", 2)==1)
+    "        :quit
+    "    endif
+    "else
+    "    :quit
+    "endif
+    quit
 endfunction
-cnoremap <silent> q<CR>  :call ConfirmQuit(0)<CR>
+cnoremap <silent> q<CR> :call ConfirmQuit(0)<CR>
+
+" Use pyenv for neovim
+let g:python_host_prog = '/Users/ryanlane/.pyenv/versions/neovim/bin/python'
+let g:python3_host_prog = '/Users/ryanlane/.pyenv/versions/neovim3/bin/python'
 
 " Setup vundle
 filetype off
@@ -106,20 +117,8 @@ let g:plist_json_filetype = 'javascript'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 let g:airline_powerline_fonts = 1
-let g:airline_theme = 'minimalist'
 " Enable the top tabline for listing buffers
 let g:airline#extensions#tabline#enabled = 1
-
-Plugin 'klen/python-mode'
-
-let g:pymode = 1
-let g:pymode_options = 0
-let g:pymode_folding = 0
-let g:pymode_rope = 0
-let g:pymode_rope_completion = 0
-" let g:pymode_lint_checkers = ['pyflakes', 'pep8', 'pep257']
-" let g:pymode_lint_checkers = ['pep8']
-let g:pymode_lint_checkers = ['pyflakes', 'pep8', 'mypy']
 
 " For sls syntax
 Plugin 'saltstack/salt-vim'
@@ -139,34 +138,79 @@ autocmd QuickFixCmdPost    l* nested lwindow
 Plugin 'fatih/vim-go'
 
 " For boilerplate snippets
-Plugin 'SirVer/ultisnips'
+"Plugin 'SirVer/ultisnips'
 
 " Trigger configuration.
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<c-b>"
-let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+"let g:UltiSnipsExpandTrigger="<tab>"
+"let g:UltiSnipsJumpForwardTrigger="<c-b>"
+"let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 
 " Snippets for ultisnips
-Plugin 'honza/vim-snippets'
+" Plugin 'honza/vim-snippets'
 
-Plugin 'Valloric/YouCompleteMe'
-" Disable for rst, since it's not supported and the autocompletion shows every
-" word in the rst doc as an ID.
-let g:ycm_filetype_blacklist = {'rst': 1}
-" Let YCM read tags from Ctags file
-let g:ycm_collect_identifiers_from_tags_files = 1
-" Completion for programming language's keyword
-let g:ycm_seed_identifiers_with_syntax = 1
-" Completion in comments
-let g:ycm_complete_in_comments = 1
-" Completion in strings
-let g:ycm_complete_in_strings = 1
-" Close the preview window when completion event occurs
-let g:ycm_autoclose_preview_window_after_completion = 1
-" Map ctrl-g to goto definition
-nnoremap <leader>g :YcmCompleter GoTo<CR>
+Plugin 'w0rp/ale'
 
-" for rst
+" Switch from --/>> to W/E
+let g:ale_sign_warning='W'
+let g:ale_sign_error='E'
+" Apply fixers on save
+let g:ale_fix_on_save = 1
+" Initialize linters and fixers
+let g:ale_linters = {}
+let g:ale_linter_aliases = {}
+let g:ale_fixers = {}
+" Show name of linter and severity level in msg format
+let g:ale_echo_msg_error_str = 'E'
+let g:ale_echo_msg_warning_str = 'W'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+" Add maps for moving between errors
+nmap <silent> <C-k> <Plug>(ale_previous_wrap)
+nmap <silent> <C-j> <Plug>(ale_next_wrap)
+" Limit the loclist size and open it when errors appear
+let g:ale_list_window_size = 2
+let g:ale_open_list = 1
+let g:ale_set_loclist = 1
+" Auto-close the loclist buffer when exiting vim
+augroup CloseLoclistWindowGroup
+  autocmd!
+  autocmd QuitPre * if empty(&buftype) | lclose | endif
+augroup END
+
+" Python
+let g:ale_linters['python'] = ['flake8', 'mypy']
+let g:ale_python_mypy_options = '--ignore-missing-imports --scripts-are-modules'
+
+" Typescript
+let g:ale_linter_aliases = {'typescriptreact': 'typescript'}
+let g:ale_linters['typescript'] = ['eslint', 'tslint']
+let g:ale_fixers['typescript'] = ['prettier']
+let g:ale_fixers['typescriptreact'] = ['prettier']
+let g:ale_javascript_prettier_options = '--single-quote --trailing-comma es5 --tab-width 4'
+
+" Typeahead completion for various languages
+Plugin 'ncm2/ncm2'
+" yarp is the ncm2 plugin manager
+Plugin 'roxma/nvim-yarp'
+" enable ncm2 for all buffers
+autocmd BufEnter * call ncm2#enable_for_buffer()
+
+" IMPORTANTE: :help Ncm2PopupOpen for more information
+set completeopt=noinsert,menuone,noselect
+
+" Python
+Plugin 'ncm2/ncm2-jedi'
+" Javascript
+Plugin 'ncm2/ncm2-tern'
+" Css
+Plugin 'cm2/ncm2-cssomni'
+" Go
+Plugin 'ncm2/ncm2-go'
+" Words from the buffer
+Plugin 'ncm2/ncm2-bufword'
+" Words from the path
+Plugin 'ncm2/ncm2-path'
+
+" Support for rst (sphinx)
 Plugin 'Rykka/riv.vim'
 let g:riv_disable_folding=1
 
@@ -179,11 +223,31 @@ Plugin 'docker/docker' , {'rtp': '/contrib/syntax/vim/'}
 
 " Filesystem hierarchy view
 Plugin 'scrooloose/nerdtree'
+
 " Exit vim if last window is nerdtree
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 nnoremap <leader>n :NERDTreeToggle<CR>
 nnoremap <leader>f :NERDTreeFind<CR>
 
+" Add onedark theme
+Plugin 'joshdick/onedark.vim'
+
 call vundle#end()
 
+" Set true black and update highlight in onedark
+if (has("autocmd"))
+  augroup colorset
+    autocmd!
+    let s:black = { "gui": "#212121", "cterm": "145", "cterm16" : "7" }
+    autocmd ColorScheme * call onedark#set_highlight("Normal", { "fg": s:black })
+  augroup END
+endif
+
+" Theme color fixes
+colorscheme onedark
+let g:onedark_termcolors=256
+let g:onedark_terminal_italics=1
+let g:airline_theme='onedark'
+
+" load plugin and ident vim files
 filetype plugin indent on
