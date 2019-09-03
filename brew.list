@@ -3,6 +3,7 @@ cmake
 curl
 dialog
 docker
+docker-compose
 glib
 gnu-getopt
 gnu-sed
@@ -18,7 +19,7 @@ libtasn1
 libusb-compat
 libxml2
 lzop
-macvim
+neovim
 mtr
 node@6
 ossp-uuid
@@ -26,6 +27,7 @@ perl
 pixman
 pwgen
 pyenv
+pyenv-virtualenv
 python
 rsync
 ruby
