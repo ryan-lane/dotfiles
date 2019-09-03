@@ -133,6 +133,7 @@ augroup END
 " Use pyenv for neovim
 let g:python_host_prog = '/Users/ryanlane/.pyenv/versions/neovim/bin/python'
 let g:python3_host_prog = '/Users/ryanlane/.pyenv/versions/neovim3/bin/python'
+let g:loaded_python_provider = 1
 
 " Setup vundle
 filetype off
@@ -213,6 +214,9 @@ let g:ale_fixers['typescript'] = ['prettier']
 let g:ale_fixers['typescriptreact'] = ['prettier']
 let g:ale_javascript_prettier_options = '--single-quote --trailing-comma es5 --tab-width 4'
 
+" Terraform
+let g:ale_fixers['terraform'] = ['terraform']
+
 " Typeahead completion for various languages
 Plugin 'ncm2/ncm2'
 " yarp is the ncm2 plugin manager
@@ -228,7 +232,7 @@ Plugin 'ncm2/ncm2-jedi'
 " Javascript
 Plugin 'ncm2/ncm2-tern'
 " Css
-Plugin 'cm2/ncm2-cssomni'
+Plugin 'ncm2/ncm2-cssomni'
 " Go
 Plugin 'ncm2/ncm2-go'
 " Words from the buffer
@@ -254,9 +258,14 @@ Plugin 'scrooloose/nerdtree'
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 nnoremap <leader>n :NERDTreeToggle<CR>
 nnoremap <leader>f :NERDTreeFind<CR>
+let NERDTreeIgnore = ['\.pyc$']
+let NERDTreeShowHidden=1
 
 " Add onedark theme
 Plugin 'joshdick/onedark.vim'
+
+" Terraform
+Plugin 'hashivim/vim-terraform'
 
 call vundle#end()
 
