@@ -2,3 +2,6 @@ shelltitle ") |"
 hardstatus alwayslastline
 hardstatus string "%{.bW}%-w%{.rW}%n %t%{-}%+w %=%{..G} %H %{..Y} %m/%d %C%a "
 defscrollback 30000
+term screen-256color
+maptimeout 5
+shell -$SHELL

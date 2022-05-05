@@ -131,9 +131,9 @@ augroup CloseLoclistWindowGroup
 augroup END
 
 " Use pyenv for neovim
-let g:python_host_prog = '/Users/ryanlane/.pyenv/versions/neovim/bin/python'
-let g:python3_host_prog = '/Users/ryanlane/.pyenv/versions/neovim3/bin/python'
-let g:loaded_python_provider = 1
+let g:python_host_prog = '/usr/bin/python2'
+let g:python3_host_prog = '/usr/bin/python3'
+"let g:loaded_python_provider = 1
 
 " Setup vundle
 filetype off
@@ -150,14 +150,11 @@ Plugin 'gmarik/Vundle.vim'
 Plugin 'darfink/vim-plist'
 let g:plist_json_filetype = 'javascript'
 
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
 let g:airline_powerline_fonts = 1
 " Enable the top tabline for listing buffers
 let g:airline#extensions#tabline#enabled = 1
-
-" For sls syntax
-Plugin 'saltstack/salt-vim'
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
 
 Plugin 'elzr/vim-json'
 " Disable the stupid quotes concealing. We're not using coffeescript, this is
@@ -207,6 +204,16 @@ nmap <silent> <C-j> <Plug>(ale_next_wrap)
 let g:ale_linters['python'] = ['flake8', 'mypy']
 let g:ale_python_mypy_options = '--ignore-missing-imports --scripts-are-modules'
 
+
+" Disable Jedi-vim autocompletion and enable call-signatures options
+let g:jedi#auto_initialization = 1
+let g:jedi#completions_enabled = 0
+let g:jedi#auto_vim_configuration = 0
+let g:jedi#smart_auto_mappings = 0
+let g:jedi#popup_on_dot = 0
+let g:jedi#completions_command = ""
+let g:jedi#show_call_signatures = "1"
+
 " Typescript
 let g:ale_linter_aliases = {'typescriptreact': 'typescript'}
 let g:ale_linters['typescript'] = ['eslint', 'tslint']
@@ -216,6 +223,8 @@ let g:ale_javascript_prettier_options = '--single-quote --trailing-comma es5 --t
 
 " Terraform
 let g:ale_fixers['terraform'] = ['terraform']
+let g:terraform_fmt_on_save=1
+let g:terraform_align=1
 
 " Typeahead completion for various languages
 Plugin 'ncm2/ncm2'
@@ -229,6 +238,7 @@ set completeopt=noinsert,menuone,noselect
 
 " Python
 Plugin 'ncm2/ncm2-jedi'
+Plugin 'davidhalter/jedi-vim'
 " Javascript
 Plugin 'ncm2/ncm2-tern'
 " Css
@@ -262,10 +272,17 @@ let NERDTreeIgnore = ['\.pyc$']
 let NERDTreeShowHidden=1
 
 " Add onedark theme
+" Theme color fixes
+let g:onedark_termcolors=256
+let g:onedark_terminal_italics=1
+let g:airline_theme='onedark'
 Plugin 'joshdick/onedark.vim'
 
 " Terraform
 Plugin 'hashivim/vim-terraform'
+
+" Copilot
+Plugin 'github/copilot.vim'
 
 call vundle#end()
 
@@ -278,11 +295,7 @@ if (has("autocmd"))
   augroup END
 endif
 
-" Theme color fixes
 colorscheme onedark
-let g:onedark_termcolors=256
-let g:onedark_terminal_italics=1
-let g:airline_theme='onedark'
 
 " load plugin and ident vim files
 filetype plugin indent on
